@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.firebase.sign_in_provider == 'google.com'; }
+    function own(uid) { return signedIn() && request.auth.uid == uid; }
+    function profilePath(uid) { return /databases/$(database)/documents/profiles/$(uid); }
+    function memberProfile() { return get(profilePath(request.auth.uid)).data; }
+    function moderator() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    function inRoom(room) { return signedIn() && exists(profilePath(request.auth.uid)) && memberProfile().ageBand == room; }
+    function band(age) { return age <= 12 ? '6–12' : age <= 15 ? '13–15' : age <= 17 ? '16–17' : age <= 20 ? '18–20' : '21+'; }
+    function validProfile(data) {
+      return data.keys().hasOnly(['username','usernameKey','age','ageBand','createdAt'])
+        && data.keys().hasAll(['username','usernameKey','age','ageBand','createdAt'])
+        && data.username is string && data.username.matches('^[A-Za-z0-9_]{3,18}$')
+        && data.usernameKey == data.username.lower()
+        && data.age is int && data.age >= 6 && data.age <= 120
+        && data.ageBand == band(data.age) && data.createdAt == request.time;
+    }
+    match /profiles/{uid} {
+      allow get: if own(uid);
+      allow create: if own(uid) && validProfile(request.resource.data)
+        && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameKey)).data.uid == uid;
+      allow update, delete, list: if false;
+    }
+    match /usernames/{name} {
+      allow get: if signedIn();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(profilePath(request.auth.uid)).data.usernameKey == name;
+      allow update, delete, list: if false;
+    }
+    match /members/{uid} {
+      allow get, list: if signedIn() && resource.data.ageBand == memberProfile().ageBand;
+      allow create: if own(uid) && request.resource.data.keys().hasOnly(['username','ageBand','createdAt'])
+        && request.resource.data.username == getAfter(profilePath(uid)).data.username
+        && request.resource.data.ageBand == getAfter(profilePath(uid)).data.ageBand
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+    match /rates/{uid} {
+      allow get: if own(uid);
+      allow create, update: if own(uid) && request.resource.data.keys().hasOnly(['lastSent','messageId'])
+        && request.resource.data.keys().hasAll(['lastSent','messageId'])
+        && request.resource.data.messageId is string
+        && request.resource.data.lastSent == request.time
+        && (!exists(/databases/$(database)/documents/rates/$(uid))
+            || request.time >= resource.data.lastSent + duration.value(3, 's'));
+      allow list, delete: if false;
+    }
+    match /rooms/{room}/messages/{messageId} {
+      allow read: if inRoom(room) || moderator();
+      allow create: if inRoom(room)
+        && request.resource.data.keys().hasOnly(['uid','username','text','createdAt'])
+        && request.resource.data.keys().hasAll(['uid','username','text','createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username == memberProfile().username
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 500
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/rates/$(request.auth.uid)).data.lastSent == request.time
+        && getAfter(/databases/$(database)/documents/rates/$(request.auth.uid)).data.messageId == messageId;
+      allow delete: if (inRoom(room) && resource.data.uid == request.auth.uid) || moderator();
+      allow update: if false;
+    }
+    match /reports/{id} {
+      allow create: if signedIn() && inRoom(request.resource.data.room)
+        && request.resource.data.keys().hasOnly(['reporterUid','room','messageId','reason','createdAt'])
+        && request.resource.data.keys().hasAll(['reporterUid','room','messageId','reason','createdAt'])
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 160
+        && exists(/databases/$(database)/documents/rooms/$(request.resource.data.room)/messages/$(request.resource.data.messageId))
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if moderator();
+      allow update: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

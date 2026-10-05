@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PYN — Learn Python Together</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand brand-large"><span class="logo-mark">P</span><span>PYN</span></div>
+      <h1>Learn Python. Build things. Meet coders.</h1>
+      <p>A social coding community where lessons lead to real Python projects.</p>
+      <button id="google-signin" class="primary-btn">Continue with Google</button>
+      <p id="google-account"></p><button id="auth-signout" class="text-btn">Sign out / switch account</button>
+      <div id="profile-setup" class="hidden">
+        <label for="username-input">Choose your PYN username</label>
+        <input id="username-input" type="text" maxlength="18" minlength="3" autocomplete="off" placeholder="e.g. PixelCoder" />
+        <label for="age-input">How old are you?</label>
+        <input id="age-input" type="number" min="6" max="120" step="1" inputmode="numeric" placeholder="Your age" />
+        <small>Your entered age chooses your community group. Other members see your username and age group, not your exact age or Google email.</small>
+        <button id="start-btn" class="primary-btn">Save my profile and enter PYN</button>
+      </div>
+      <p id="account-status" role="status" aria-live="polite">Preparing sign-in…</p>
+      <button id="demo-btn" class="secondary-btn">Preview lessons without signing in</button>
+
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="logo-mark">P</span><span>PYN</span></div>
+      <nav id="nav">
+        <button class="nav-item active" data-page="home"><span>⌂</span> Home</button>
+        <button class="nav-item" data-page="learn"><span>▤</span> Learn</button>
+        <button class="nav-item" data-page="projects"><span>⌘</span> Projects</button>
+        <button class="nav-item" data-page="community"><span>◉</span> Community</button>
+        <button class="nav-item" data-page="profile"><span>☺</span> You</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="mini-profile">
+          <div class="avatar small" id="sidebar-avatar">🧑🏽‍💻</div>
+          <div><strong id="sidebar-name">Coder</strong><small id="sidebar-level">Level 1</small></div>
+        </div>
+        <button id="signout-btn" class="text-btn">Sign out</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="page-eyebrow">PYN COMMUNITY</p>
+          <h2 id="page-title">Home</h2>
+        </div>
+        <div class="top-stats">
+          <div class="stat-pill">🔥 <strong id="streak-count">1</strong> day streak</div>
+          <div class="stat-pill">⭐ <strong id="xp-count">0</strong> XP</div>
+        </div>
+      </header>
+
+      <section id="home" class="page active-page">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">WELCOME BACK</p>
+            <h1 id="welcome-title">Ready to code?</h1>
+            <p>Learn one concept, use it immediately, and build something you can show the community.</p>
+            <button class="primary-btn" data-continue="true">Continue learning</button>
+          </div>
+          <div class="hero-code">
+            <span>python</span>
+            <pre><code>name = "PYN"
+
+for day in range(1, 4):
+    print(f"Day {day}: keep building!")</code></pre>
+          </div>
+        </div>
+
+        <div class="section-head"><div><h3>People on PYN</h3><p>Real members in your age group.</p></div><button class="text-btn" data-go="community">See community</button></div>
+        <div id="people-row" class="people-row"></div>
+
+        <div class="two-col">
+          <div>
+            <div class="section-head"><div><h3>Continue learning</h3><p>Your current Python path.</p></div></div>
+            <div class="continue-card">
+              <div class="lesson-icon">🐍</div>
+              <div class="grow">
+                <div class="space-between"><strong>Your Python course</strong><span id="progress-label">0%</span></div>
+                <div class="progress"><div id="progress-bar"></div></div>
+                <p id="next-lesson-label">Start with: 10 Fun Facts About Python</p>
+              </div>
+              <button class="circle-btn" data-continue="true">→</button>
+            </div>
+          </div>
+          <div>
+            <div class="section-head"><div><h3>Daily challenge</h3><p>Small wins every day.</p></div></div>
+            <div class="challenge-card">
+              <span class="tag">+20 XP</span>
+              <h4>Make Python say hello</h4>
+              <p>Write one line that prints <strong>Hello PYN!</strong></p>
+              <button id="challenge-btn" class="secondary-btn">Try challenge</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head"><div><h3>Projects</h3><p>The PYN version of game cards: things you can actually build.</p></div><button class="text-btn" data-go="projects">View all</button></div>
+        <div id="home-projects" class="project-grid"></div>
+      </section>
+
+      <section id="learn" class="page">
+        <div class="learn-layout">
+          <div>
+            <div class="section-head"><div><h3>Your Python learning path</h3><p>Small steps from first instructions to bigger Python ideas.</p></div></div>
+            <a class="practice-link" href="https://code.visualstudio.com/download" target="_blank" rel="noopener noreferrer">Use VS Code to practice! ↗</a><div class="course-controls"><label for="course-section">Choose a section</label><select id="course-section"></select><label for="course-search">Find a lesson</label><input id="course-search" type="search" placeholder="Try lists, games, files, or charts"><p id="course-count" role="status"></p></div><div id="lesson-path" class="lesson-path"></div><details class="resource-directory"><summary>Extra W3Schools resources</summary><p>Reference tables, additional practice tools, and services. These links open W3Schools.</p><div id="course-resources"></div></details>
+          </div>
+          <aside class="learn-side">
+            <div class="panel sticky">
+              <span class="tag">HOW PYN TEACHES</span>
+              <h3>Learn → change → test → build</h3>
+              <p>Start with PYN Fundamentals. Then explore classes, files, charts, algorithms, and databases. Every lesson has small examples and a question to check your understanding.</p>
+              <div class="mini-rule"><b>1</b><span>Understand it in plain English.</span></div>
+              <div class="mini-rule"><b>2</b><span>Run a tiny example.</span></div>
+              <div class="mini-rule"><b>3</b><span>Change the code yourself.</span></div>
+              <div class="mini-rule"><b>4</b><span>Use it in a project.</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="projects" class="page">
+        <div class="section-head"><div><h3>Python projects</h3><p>Pick something fun and learn the concepts needed to build it.</p></div><button id="create-project-btn" class="primary-btn">+ Create a project</button></div><div id="my-projects"></div>
+        <div class="filter-row">
+          <button class="filter active" data-filter="all">All</button>
+          <button class="filter" data-filter="Beginner">Beginner</button>
+          <button class="filter" data-filter="Intermediate">Intermediate</button>
+          <button class="filter" data-filter="Advanced">Advanced</button>
+        </div>
+        <div id="project-grid" class="project-grid large"></div>
+      </section>
+
+      <section id="community" class="page">
+        <div class="community-new-head"><div><p class="eyebrow">LEARN TOGETHER</p><h1>Your PYN community</h1><p>Meet learners and share messages in your age group.</p></div></div>
+        <div class="community-safety"><strong>Keep your personal information private</strong><span>Use your PYN username. Group chat has no private direct messages. Age groups use the ages members enter.</span></div>
+        <div class="community-new-grid"><div>
+          <div class="panel"><div class="section-head"><div><h3>Members in your group</h3><p>Real profiles from connected Google accounts.</p></div></div><div id="live-member-list"></div><button id="unblock-all" class="text-btn" hidden>Unblock all hidden members on this device</button></div>
+          <div class="panel chat-panel"><h3 id="group-chat-title">Age-group chat</h3><div id="chat-messages" class="chat-messages" aria-live="polite"></div><form id="chat-form"><label for="chat-text">Your message</label><textarea id="chat-text" maxlength="500" placeholder="Say hello or ask a Python question…" disabled></textarea><button id="send-chat" class="primary-btn" type="submit" disabled>Send message</button><p id="chat-status" role="status">Sign in to chat.</p></form></div>
+        </div><aside class="community-new-side"><div class="community-side-card"><h3>Your age group</h3><strong id="age-band-label">Not set</strong><p>Based on the age you entered when creating your profile.</p></div><div class="community-side-card"><h3>Member availability</h3><div id="online-list"></div></div></aside></div>
+      </section>
+
+      <section id="profile" class="page">
+        <div class="profile-header panel">
+          <div id="big-avatar" class="avatar huge">🧑🏽‍💻</div>
+          <div class="grow">
+            <p class="eyebrow">YOUR PYN PROFILE</p>
+            <h1 id="profile-name">Coder</h1>
+            <p><span id="profile-connection-label">Local preview</span> · <span id="profile-rank">Python Starter</span></p>
+            <div class="profile-stats"><div><strong id="profile-xp">0</strong><small>XP</small></div><div><strong id="profile-lessons">0</strong><small>Lessons</small></div><div><strong id="profile-projects">0</strong><small>Projects</small></div></div>
+          </div>
+        </div>
+
+        <div class="two-col profile-cols">
+          <div class="panel">
+            <div class="section-head"><div><h3>Edit avatar</h3><p>Duolingo-style customization, PYN edition.</p></div></div>
+            <div id="avatar-options" class="avatar-options"></div>
+            <h4>PYN Accessories</h4>
+            <div id="accessory-options" class="unlock-grid">
+              <div class="unlock">🔒 <span>Python Hoodie<small>Reach Level 5</small></span></div>
+              <div class="unlock">🔒 <span>Golden Snake<small>Complete 30 lessons</small></span></div>
+              <div class="unlock">🔒 <span>Hacker Glasses<small>Finish 1 project</small></span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-head"><div><h3>Your settings</h3><p>Learning and appearance preferences.</p></div></div>
+            <label>Display name</label>
+            <input id="display-name-input" type="text" maxlength="18" />
+            <label for="theme-select">Preferred color</label><select id="theme-select"><option value="purple">Purple</option><option value="blue">Blue</option><option value="green">Green</option><option value="rose">Rose</option><option value="orange">Orange</option></select><label>Learning level</label>
+            <select id="level-select">
+              <option>I've never coded before</option>
+              <option>I know a little Python</option>
+              <option>I already know the basics</option>
+            </select>
+            <button id="save-profile-btn" class="primary-btn">Save changes</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="close-modal" class="modal-close">×</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script src="course.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="community.js"></script>
+</body>
+</html>
